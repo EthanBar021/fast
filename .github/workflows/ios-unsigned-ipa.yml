@@ -1,0 +1,55 @@
+# Builds an UNSIGNED .ipa of Fast on a GitHub-hosted Mac, for sideloading
+# (e.g. Sideloadly signs it with your own Apple ID). No Apple Developer account needed.
+# Run it manually: GitHub › Actions › "iOS — .ipa non signé" › Run workflow.
+name: iOS — .ipa non signé
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate the native iOS project (Expo prebuild + CocoaPods)
+        run: npx expo prebuild --platform ios --clean
+
+      - name: Archive without code signing
+        run: |
+          xcodebuild \
+            -workspace ios/Fast.xcworkspace \
+            -scheme Fast \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Fast.xcarchive" \
+            -quiet \
+            archive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+
+      - name: Package the .ipa
+        run: |
+          mkdir -p "$RUNNER_TEMP/ipa/Payload"
+          cp -R "$RUNNER_TEMP/Fast.xcarchive/Products/Applications/Fast.app" "$RUNNER_TEMP/ipa/Payload/"
+          cd "$RUNNER_TEMP/ipa"
+          zip -qry "$GITHUB_WORKSPACE/Fast-unsigned.ipa" Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Fast-unsigned-ipa
+          path: Fast-unsigned.ipa
+          retention-days: 14
