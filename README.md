@@ -1,7 +1,7 @@
 # Fast
 
 Application iPhone de mesure en voiture : vitesse, forces G et trajet.
-Bêta personnelle — tout reste sur le téléphone (pas de compte, pas de serveur).
+Bêta personnelle 
 
 ## Stack
 
@@ -14,7 +14,7 @@ npm install
 npx expo start
 ```
 
-Ouvrir le QR code avec Expo Go sur l'iPhone (même compte Expo dans le terminal et dans l'app).
+Ouvrir le QR code avec Expo Go sur l'iPhone 
 
 ## Vérifications
 
@@ -26,8 +26,7 @@ npm test
 
 ## Build iOS
 
-`.ipa` non signé via GitHub Actions : onglet **Actions** › **iOS — .ipa non signé** › **Run workflow**,
-puis installation avec un outil de sideload.
+`.ipa` non signé via GitHub Actions
 
 ---
 
